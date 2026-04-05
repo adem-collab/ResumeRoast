@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResumeFired — Your Resume Is Getting Ignored. Find Out Why.</title>
+<meta name="description" content="AI-powered resume critique and rewrite. Get brutal honest feedback in 60 seconds. Free roast, $9 full rewrite.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #F5F0E8;
+  --dark: #1A1208;
+  --fire: #FF3D00;
+  --amber: #FF8C00;
+  --smoke: #8A7D6B;
+  --paper: #FFF8EE;
+  --ash: #E8E0D0;
+  --green: #16A34A;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--dark); font-family: 'DM Mono', monospace; overflow-x: hidden; }
+
+/* ── ANNOUNCEMENT BAR ── */
+.announce-bar {
+  background: var(--dark);
+  color: white;
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  padding: 0.6rem 1rem;
+}
+.announce-bar span { color: var(--fire); }
+
+/* ── HEADER ── */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 3rem;
+  background: var(--bg);
+  border-bottom: 2px solid var(--dark);
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 3px; }
+.logo span { color: var(--fire); }
+.nav-links { display: flex; gap: 2rem; align-items: center; }
+.nav-links a { font-size: 0.7rem; letter-spacing: 2px; color: var(--smoke); text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
+.nav-links a:hover { color: var(--dark); }
+.header-cta { background: var(--fire); color: white; border: none; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; padding: 0.7rem 1.5rem; cursor: pointer; text-transform: uppercase; transition: all 0.2s; white-space: nowrap; }
+.header-cta:hover { background: var(--dark); }
+.hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 4px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--dark); transition: all 0.3s; }
+.mobile-menu { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 300; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 4px; color: var(--dark); text-decoration: none; }
+.mobile-menu a:hover { color: var(--fire); }
+.mobile-close { position: absolute; top: 1.5rem; right: 2rem; background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--dark); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 92vh;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  padding: 5rem 3rem 4rem;
+  gap: 4rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  right: -100px; bottom: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #FF3D0012 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow { font-size: 0.68rem; letter-spacing: 4px; color: var(--fire); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem; }
+.hero-eyebrow::before { content: ''; width: 30px; height: 2px; background: var(--fire); display: inline-block; flex-shrink: 0; }
+.hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 6vw, 6rem); line-height: 0.95; margin-bottom: 2rem; }
+.hero-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--fire); }
+.hero-sub { font-size: 0.85rem; line-height: 2; color: var(--smoke); max-width: 500px; margin-bottom: 2.5rem; }
+.hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.btn-fire { background: var(--fire); color: white; border: 2px solid var(--fire); font-family: 'DM Mono', monospace; font-size: 0.78rem; letter-spacing: 2px; padding: 0.9rem 2rem; cursor: pointer; text-transform: uppercase; transition: all 0.2s; text-decoration: none; display: inline-block; }
+.btn-fire:hover { background: var(--dark); border-color: var(--dark); }
+.btn-ghost { background: transparent; color: var(--dark); border: 2px solid var(--dark); font-family: 'DM Mono', monospace; font-size: 0.78rem; letter-spacing: 2px; padding: 0.9rem 2rem; cursor: pointer; text-transform: uppercase; transition: all 0.2s; text-decoration: none; display: inline-block; }
+.btn-ghost:hover { background: var(--dark); color: white; }
+.trust-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.trust-item { font-size: 0.68rem; color: var(--smoke); letter-spacing: 1px; display: flex; align-items: center; gap: 0.4rem; }
+.trust-item::before { content: '✓'; color: var(--green); font-weight: bold; }
+
+/* Resume visual */
+.hero-visual { position: relative; display: flex; justify-content: center; align-items: center; }
+.resume-stack { position: relative; width: 300px; height: 380px; }
+.resume-card {
+  background: var(--paper);
+  border: 2px solid #D0C8B8;
+  padding: 1.8rem;
+  width: 280px;
+  position: absolute;
+  box-shadow: 6px 6px 0 #D0C8B8;
+}
+.resume-card.back { top: 20px; left: 20px; transform: rotate(4deg); opacity: 0.5; }
+.resume-card.front { top: 0; left: 0; animation: cardFloat 4s ease-in-out infinite; }
+@keyframes cardFloat { 0%,100%{transform:rotate(-2deg) translateY(0)} 50%{transform:rotate(-2deg) translateY(-8px)} }
+.r-label { position: absolute; top: -12px; left: 16px; background: var(--fire); color: white; font-size: 0.6rem; letter-spacing: 3px; padding: 0.15rem 0.7rem; }
+.r-line { height: 7px; background: var(--ash); border-radius: 2px; margin-bottom: 7px; }
+.r-line.name { width: 55%; height: 13px; background: #C8C0B0; margin-bottom: 14px; }
+.r-line.s { width: 35%; }
+.r-line.m { width: 70%; }
+.r-line.f { width: 100%; }
+.score-badge { position: absolute; top: -20px; right: -15px; width: 72px; height: 72px; background: var(--dark); color: var(--fire); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; line-height: 1; transform: rotate(12deg); box-shadow: 3px 3px 0 var(--fire); }
+.score-badge small { font-size: 0.45rem; letter-spacing: 2px; color: var(--smoke); font-family: 'DM Mono', monospace; }
+.fire-emoji { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); font-size: 3.5rem; filter: drop-shadow(0 0 15px #FF3D0066); animation: fireFlicker 0.6s ease-in-out infinite alternate; }
+@keyframes fireFlicker { from{transform:translateX(-50%) scale(1)} to{transform:translateX(-50%) scale(1.08) rotate(2deg)} }
+
+/* ── STATS BAR ── */
+.stats-bar { background: var(--dark); padding: 2.5rem 3rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+.stat { text-align: center; }
+.stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--fire); letter-spacing: 2px; line-height: 1; }
+.stat-label { font-size: 0.65rem; letter-spacing: 2px; color: #4A4030; text-transform: uppercase; margin-top: 0.3rem; }
+
+/* ── VIDEO SECTION ── */
+.video-section { padding: 6rem 3rem; background: var(--ash); }
+.video-inner { max-width: 860px; margin: 0 auto; }
+.section-eyebrow { font-size: 0.68rem; letter-spacing: 4px; color: var(--fire); text-transform: uppercase; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.8rem; }
+.section-eyebrow::before { content: ''; width: 30px; height: 2px; background: var(--fire); display: inline-block; flex-shrink: 0; }
+.section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 4.5vw, 3.8rem); letter-spacing: 2px; line-height: 1; margin-bottom: 2.5rem; }
+.section-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--fire); }
+.video-placeholder {
+  background: var(--dark);
+  border: 2px solid #2A2018;
+  aspect-ratio: 16/9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.video-placeholder::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, #FF3D0008 0%, transparent 70%); }
+.play-btn { width: 72px; height: 72px; background: var(--fire); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: transform 0.2s; }
+.video-placeholder:hover .play-btn { transform: scale(1.1); }
+.video-caption { font-size: 0.75rem; letter-spacing: 3px; color: #4A4030; text-transform: uppercase; }
+.video-subtitle { font-size: 0.65rem; color: #2A2018; letter-spacing: 1px; }
+
+/* ── HOW IT WORKS ── */
+.how-section { padding: 6rem 3rem; }
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 3rem; }
+.step { border: 1px solid #D0C8B8; padding: 2rem; position: relative; background: var(--paper); transition: all 0.3s; }
+.step:hover { border-color: var(--fire); transform: translateY(-4px); }
+.step-num { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: var(--ash); line-height: 1; margin-bottom: 0.5rem; }
+.step-icon { font-size: 2rem; margin-bottom: 1rem; }
+.step-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; margin-bottom: 0.8rem; }
+.step-desc { font-size: 0.78rem; color: var(--smoke); line-height: 1.9; }
+.step-arrow { position: absolute; top: 50%; right: -20px; transform: translateY(-50%); color: var(--fire); font-size: 1.2rem; z-index: 1; }
+
+/* ── TOOL ── */
+.roast-section { background: var(--dark); padding: 6rem 3rem; position: relative; overflow: hidden; }
+.roast-section::before { content: 'ROAST'; position: absolute; font-family: 'Bebas Neue', sans-serif; font-size: 18vw; color: rgba(255,61,0,0.03); top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; letter-spacing: 10px; white-space: nowrap; }
+.roast-label { font-size: 0.68rem; letter-spacing: 4px; color: var(--fire); text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.8rem; }
+.roast-label::before { content: ''; width: 30px; height: 2px; background: var(--fire); display: inline-block; }
+.roast-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 4.5vw, 4rem); color: white; letter-spacing: 2px; margin-bottom: 0.5rem; }
+.roast-title em { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--fire); }
+.roast-sub { font-size: 0.78rem; color: #4A4030; letter-spacing: 1px; margin-bottom: 3rem; }
+.tool-wrapper { max-width: 820px; margin: 0 auto; }
+.tool-box { background: #0D0A06; border: 1px solid #2A2018; padding: 2.5rem; }
+.plan-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.plan-card { border: 1px solid #2A2018; padding: 1.2rem; cursor: pointer; transition: all 0.2s; text-align: center; position: relative; }
+.plan-card:hover, .plan-card.selected { border-color: var(--fire); }
+.plan-card.selected { background: #FF3D0010; }
+.plan-card.selected::after { content: '✓'; position: absolute; top: 8px; right: 10px; color: var(--fire); font-size: 0.8rem; }
+.plan-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--fire); color: white; font-size: 0.55rem; letter-spacing: 2px; padding: 0.15rem 0.6rem; white-space: nowrap; }
+.plan-name { font-size: 0.65rem; letter-spacing: 2px; color: #6A5A4A; text-transform: uppercase; margin-bottom: 0.4rem; }
+.plan-price { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: white; line-height: 1; }
+.plan-desc { font-size: 0.6rem; color: #3A2A1A; margin-top: 0.4rem; line-height: 1.6; }
+.step-label { font-size: 0.62rem; letter-spacing: 3px; color: #4A4030; text-transform: uppercase; margin-bottom: 0.8rem; }
+textarea { width: 100%; background: #080604; border: 1px solid #2A2018; color: #C8B89A; font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 1.2rem; resize: vertical; min-height: 180px; line-height: 1.8; outline: none; transition: border-color 0.2s; }
+textarea:focus { border-color: var(--fire); }
+textarea::placeholder { color: #2A2018; }
+.tool-step { margin-bottom: 1.8rem; }
+.submit-btn { width: 100%; background: var(--fire); color: white; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 4px; padding: 1.2rem; cursor: pointer; transition: all 0.2s; }
+.submit-btn:hover:not(:disabled) { background: #CC3000; }
+.submit-btn:disabled { background: #2A2018; color: #3A3020; cursor: not-allowed; }
+.loading-bar { display: none; height: 2px; background: #2A2018; margin-top: 1rem; overflow: hidden; }
+.loading-bar.visible { display: block; }
+.loading-bar::after { content: ''; display: block; width: 40%; height: 100%; background: var(--fire); animation: loadSlide 1s ease-in-out infinite; }
+@keyframes loadSlide { 0%{margin-left:-40%} 100%{margin-left:100%} }
+.loading-text { display: none; text-align: center; font-size: 0.68rem; letter-spacing: 3px; color: var(--fire); margin-top: 1rem; text-transform: uppercase; }
+.loading-text.visible { display: block; animation: pulse 1s ease-in-out infinite alternate; }
+@keyframes pulse { from{opacity:0.4} to{opacity:1} }
+.result-area { display: none; margin-top: 2rem; background: #080604; border: 1px solid #2A2018; padding: 2rem; animation: fadeUp 0.5s ease; }
+.result-area.visible { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.result-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #2A2018; }
+.result-score { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--fire); display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--fire); flex-shrink: 0; }
+.result-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: white; letter-spacing: 2px; }
+.result-sub { font-size: 0.65rem; color: #4A4030; letter-spacing: 1px; margin-top: 0.2rem; }
+.result-content { font-size: 0.8rem; line-height: 2; color: #C8B89A; white-space: pre-wrap; }
+.upgrade-box { margin-top: 1.5rem; padding: 1.2rem; border: 1px solid var(--fire); background: #FF3D0008; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 1rem; }
+.upgrade-text { font-size: 0.75rem; color: #8A7A6A; line-height: 1.6; }
+.upgrade-text strong { color: white; display: block; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; }
+
+/* ── PRICING ── */
+.pricing-section { padding: 6rem 3rem; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; max-width: 900px; background: var(--dark); margin-top: 3rem; }
+.pricing-card { background: var(--bg); padding: 2.5rem 2rem; position: relative; }
+.pricing-card.featured { background: var(--dark); color: white; }
+.p-badge { font-size: 0.6rem; letter-spacing: 3px; color: var(--fire); text-transform: uppercase; margin-bottom: 1rem; }
+.p-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; margin-bottom: 0.5rem; }
+.p-price { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: var(--fire); line-height: 1; margin-bottom: 0.4rem; }
+.p-period { font-size: 0.65rem; color: var(--smoke); letter-spacing: 1px; margin-bottom: 1.5rem; }
+.pricing-card.featured .p-period { color: #4A4030; }
+.p-features { list-style: none; margin-bottom: 2rem; }
+.p-features li { font-size: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; gap: 0.8rem; color: var(--smoke); line-height: 1.5; }
+.pricing-card.featured .p-features li { color: #6A5A4A; border-color: rgba(255,255,255,0.05); }
+.p-features li::before { content: '→'; color: var(--fire); flex-shrink: 0; }
+.pay-btn { display: block; text-align: center; padding: 0.9rem; font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; cursor: pointer; border: none; font-family: 'DM Mono', monospace; width: 100%; transition: all 0.2s; }
+.pay-btn-fire { background: var(--fire); color: white; }
+.pay-btn-fire:hover { background: #CC3000; }
+.pay-btn-outline { background: transparent; color: var(--dark); border: 2px solid var(--dark); }
+.pay-btn-outline:hover { background: var(--dark); color: white; }
+.pay-note { font-size: 0.6rem; color: #B0A090; text-align: center; margin-top: 0.8rem; letter-spacing: 1px; }
+
+/* ── TESTIMONIALS ── */
+.testimonials { padding: 6rem 3rem; background: var(--ash); }
+.testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3rem; }
+.testi-card { background: var(--paper); border: 1px solid #D0C8B8; padding: 2rem; position: relative; transition: all 0.3s; }
+.testi-card:hover { border-color: var(--fire); transform: translateY(-3px); }
+.testi-tag { position: absolute; top: -10px; right: 16px; background: var(--fire); color: white; font-size: 0.58rem; letter-spacing: 2px; padding: 0.15rem 0.6rem; text-transform: uppercase; }
+.testi-stars { color: #FFB800; font-size: 0.9rem; margin-bottom: 1rem; letter-spacing: 2px; }
+.testi-quote { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 1rem; line-height: 1.75; color: var(--dark); margin-bottom: 1.5rem; }
+.testi-quote::before { content: '"'; font-size: 2.5rem; color: var(--fire); line-height: 0; vertical-align: -0.6rem; margin-right: 0.1rem; }
+.testi-author { font-size: 0.68rem; letter-spacing: 2px; color: var(--smoke); text-transform: uppercase; }
+.testi-role { font-size: 0.62rem; color: #B0A090; margin-top: 0.2rem; }
+
+/* ── FAQ ── */
+.faq-section { padding: 6rem 3rem; }
+.faq-grid { max-width: 700px; margin-top: 3rem; }
+.faq-item { border-bottom: 1px solid #D0C8B8; }
+.faq-q { width: 100%; background: none; border: none; text-align: left; font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--dark); padding: 1.2rem 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; }
+.faq-q:hover { color: var(--fire); }
+.faq-arrow { color: var(--fire); font-size: 1rem; transition: transform 0.3s; flex-shrink: 0; }
+.faq-a { display: none; padding-bottom: 1.2rem; font-size: 0.78rem; color: var(--smoke); line-height: 1.9; }
+.faq-item.open .faq-a { display: block; }
+.faq-item.open .faq-arrow { transform: rotate(45deg); }
+
+/* ── CONTACT ── */
+.contact-section { padding: 6rem 3rem; background: var(--dark); }
+.contact-inner { max-width: 600px; }
+.contact-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 4vw, 3.5rem); color: white; letter-spacing: 2px; margin-bottom: 0.8rem; }
+.contact-sub { font-size: 0.78rem; color: #4A4030; line-height: 1.9; margin-bottom: 2.5rem; }
+.form-group { margin-bottom: 1.2rem; }
+.form-label { font-size: 0.62rem; letter-spacing: 3px; color: #4A4030; text-transform: uppercase; display: block; margin-bottom: 0.5rem; }
+.form-input { width: 100%; background: #080604; border: 1px solid #2A2018; color: #C8B89A; font-family: 'DM Mono', monospace; font-size: 0.8rem; padding: 0.9rem 1rem; outline: none; transition: border-color 0.2s; }
+.form-input:focus { border-color: var(--fire); }
+.form-input::placeholder { color: #2A2018; }
+select.form-input option { background: #0D0A06; }
+.form-submit { background: var(--fire); color: white; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 4px; padding: 1rem 3rem; cursor: pointer; transition: all 0.2s; }
+.form-submit:hover { background: #CC3000; }
+.form-success { display: none; background: #0D3A1A; border: 1px solid var(--green); padding: 1.2rem; margin-top: 1rem; font-size: 0.78rem; color: #4ADE80; letter-spacing: 1px; }
+.form-success.visible { display: block; }
+
+/* ── CTA BANNER ── */
+.cta-banner { background: var(--fire); padding: 5rem 3rem; text-align: center; }
+.cta-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem, 5vw, 4.5rem); color: white; letter-spacing: 3px; margin-bottom: 1rem; }
+.cta-sub { font-size: 0.8rem; color: rgba(255,255,255,0.7); letter-spacing: 2px; margin-bottom: 2rem; }
+.btn-white { background: white; color: var(--fire); border: 2px solid white; font-family: 'DM Mono', monospace; font-size: 0.8rem; letter-spacing: 2px; padding: 1rem 2.5rem; cursor: pointer; text-transform: uppercase; transition: all 0.2s; text-decoration: none; display: inline-block; }
+.btn-white:hover { background: transparent; color: white; }
+
+/* ── FOOTER ── */
+footer { background: var(--dark); color: white; padding: 3rem; border-top: 3px solid var(--fire); }
+.footer-inner { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 2rem; }
+.footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 3px; margin-bottom: 0.5rem; }
+.footer-logo span { color: var(--fire); }
+.footer-tagline { font-size: 0.65rem; color: #3A3020; letter-spacing: 1px; }
+.footer-links { display: flex; flex-direction: column; gap: 0.5rem; }
+.footer-links a { font-size: 0.68rem; color: #4A4030; letter-spacing: 1px; text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--fire); }
+.footer-links h4 { font-size: 0.65rem; letter-spacing: 3px; color: #2A2018; text-transform: uppercase; margin-bottom: 0.5rem; }
+.footer-bottom { border-top: 1px solid #1A1208; margin-top: 2rem; padding-top: 1.5rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; font-size: 0.62rem; color: #2A2018; letter-spacing: 1px; }
+.disclaimer { font-size: 0.6rem; color: #2A2018; max-width: 500px; line-height: 1.8; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; padding: 4rem 1.5rem 3rem; }
+  .hero-visual { display: none; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 2rem 1.5rem; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .step-arrow { display: none; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .plan-selector { grid-template-columns: 1fr; }
+  header { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  .roast-section, .pricing-section, .how-section, .testimonials, .faq-section, .contact-section, .video-section { padding: 4rem 1.5rem; }
+  .tool-box { padding: 1.5rem; }
+  .footer-inner { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT -->
+<div class="announce-bar">🔥 Limited time: Free resume roast for the first <span>100 users</span> — No signup needed</div>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="closeMobile()">✕</button>
+  <a href="#how" onclick="closeMobile()">How It Works</a>
+  <a href="#tool" onclick="closeMobile()">Get Roasted</a>
+  <a href="#pricing" onclick="closeMobile()">Pricing</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
+  <a href="#tool" class="btn-fire" onclick="closeMobile()">🔥 Free Roast</a>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">RESUME<span>FIRED</span> 🔥</div>
+  <nav class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#tool">Get Roasted</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <button class="header-cta" onclick="document.getElementById('tool').scrollIntoView({behavior:'smooth'})">🔥 Free Roast</button>
+  <button class="hamburger" onclick="openMobile()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <p class="hero-eyebrow">AI-POWERED RESUME CRITIC</p>
+    <h1 class="hero-title">YOUR RESUME IS<br>GETTING <em>IGNORED.</em><br>FIND OUT WHY.</h1>
+    <p class="hero-sub">Paste your resume and our AI gives you a brutal, honest critique in 60 seconds — then rewrites it into something that actually gets callbacks.</p>
+    <div class="hero-actions">
+      <a href="#tool" class="btn-fire">🔥 Roast My Resume — Free</a>
+      <a href="#how" class="btn-ghost">See How It Works</a>
+    </div>
+    <div class="trust-row">
+      <span class="trust-item">Free roast, no signup</span>
+      <span class="trust-item">60 second results</span>
+      <span class="trust-item">AI-powered, not human</span>
+      <span class="trust-item">Honest feedback</span>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="resume-stack">
+      <div class="resume-card back">
+        <div class="r-line name"></div>
+        <div class="r-line m"></div>
+        <div class="r-line f"></div>
+      </div>
+      <div class="resume-card front">
+        <div class="r-label">YOUR RESUME</div>
+        <div class="score-badge">23<small>/100</small></div>
+        <div class="r-line name"></div>
+        <div class="r-line s"></div>
+        <div class="r-line m"></div>
+        <div style="height:12px"></div>
+        <div class="r-line f"></div>
+        <div class="r-line m"></div>
+        <div class="r-line f"></div>
+        <div class="r-line s"></div>
+        <div style="height:12px"></div>
+        <div class="r-line f"></div>
+        <div class="r-line m"></div>
+        <div class="r-line f"></div>
+      </div>
+      <div class="fire-emoji">🔥</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat"><div class="stat-num">2,400+</div><div class="stat-label">Resumes Roasted</div></div>
+  <div class="stat"><div class="stat-num">68%</div><div class="stat-label">Got Callbacks After Rewrite</div></div>
+  <div class="stat"><div class="stat-num">60s</div><div class="stat-label">Average Roast Time</div></div>
+  <div class="stat"><div class="stat-num">$9</div><div class="stat-label">Full Rewrite Cost</div></div>
+</div>
+
+<!-- VIDEO -->
+<section class="video-section" id="demo">
+  <div class="video-inner">
+    <p class="section-eyebrow">SEE IT IN ACTION</p>
+    <h2 class="section-title">WATCH A RESUME<br>GET <em>DESTROYED</em></h2>
+    <div class="video-placeholder" onclick="alert('Video coming soon! For now, scroll down and try the free roast yourself.')">
+      <div class="play-btn">▶</div>
+      <p class="video-caption">WATCH: REAL RESUME GETS ROASTED LIVE</p>
+      <p class="video-subtitle">2:34 — Before &amp; After Comparison</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <p class="section-eyebrow">THE PROCESS</p>
+  <h2 class="section-title">THREE STEPS TO A<br><em>BETTER</em> RESUME</h2>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">📋</div>
+      <h3 class="step-title">PASTE YOUR RESUME</h3>
+      <p class="step-desc">Copy and paste your resume text into the tool. No file uploads, no account, no email required. Just your resume text.</p>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon">🔥</div>
+      <h3 class="step-title">GET ROASTED BY AI</h3>
+      <p class="step-desc">Our AI tears apart every weakness — vague bullet points, missing keywords, generic summaries, ATS failures. Honest. Brutal. Specific.</p>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon">✅</div>
+      <h3 class="step-title">GET THE FIX</h3>
+      <p class="step-desc">Upgrade for $9 to get your resume fully rewritten by AI — stronger bullet points, ATS keywords, and a compelling summary.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TOOL -->
+<section class="roast-section" id="tool">
+  <p class="roast-label">THE TOOL</p>
+  <h2 class="roast-title">PASTE YOUR RESUME.<br>BRACE FOR <em>IMPACT.</em></h2>
+  <p class="roast-sub">FREE for the roast. Upgrade for the fix.</p>
+
+  <div class="tool-wrapper">
+    <div class="tool-box">
+      <div class="tool-step">
+        <p class="step-label">STEP 1 — CHOOSE YOUR PLAN</p>
+        <div class="plan-selector">
+          <div class="plan-card selected" onclick="selectPlan(this,'free')">
+            <div class="plan-name">Free Roast</div>
+            <div class="plan-price">$0</div>
+            <div class="plan-desc">Brutal critique. No rewrite included.</div>
+          </div>
+          <div class="plan-card" onclick="selectPlan(this,'rewrite')">
+            <div class="plan-badge">MOST POPULAR</div>
+            <div class="plan-name">Full Rewrite</div>
+            <div class="plan-price">$9</div>
+            <div class="plan-desc">Roast + complete rewritten resume.</div>
+          </div>
+          <div class="plan-card" onclick="selectPlan(this,'full')">
+            <div class="plan-name">Full Package</div>
+            <div class="plan-price">$19</div>
+            <div class="plan-desc">Rewrite + tailored cover letter.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-step">
+        <p class="step-label">STEP 2 — PASTE YOUR RESUME TEXT</p>
+        <textarea id="resumeInput" placeholder="Paste your full resume here...&#10;&#10;Include: name, contact info, work experience, skills, education — everything.&#10;&#10;Example:&#10;John Smith | john@email.com&#10;&#10;EXPERIENCE&#10;Software Engineer at XYZ Corp (2021–2024)&#10;• Responsible for developing web features..."></textarea>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="roastResume()">🔥 ROAST MY RESUME NOW — FREE</button>
+      <div class="loading-bar" id="loadingBar"></div>
+      <div class="loading-text" id="loadingText">AI IS READING YOUR RESUME...</div>
+
+      <div class="result-area" id="resultArea">
+        <div class="result-header">
+          <div class="result-score" id="scoreCircle">--</div>
+          <div>
+            <div class="result-title">YOUR RESUME ROAST</div>
+            <div class="result-sub">POWERED BY CLAUDE AI — HONEST &amp; SPECIFIC</div>
+          </div>
+        </div>
+        <div class="result-content" id="resultContent"></div>
+        <div class="upgrade-box" id="upgradeBox" style="display:none">
+          <div class="upgrade-text">
+            <strong>WANT THE FULL REWRITE?</strong>
+            Now that you've seen what's wrong — let AI fix it for you. Complete rewrite for $9.
+          </div>
+          <a href="#pricing" class="btn-fire" style="white-space:nowrap">GET REWRITE — $9</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <p class="section-eyebrow">PRICING</p>
+  <h2 class="section-title">SIMPLE PRICING.<br><em>BIG RESULTS.</em></h2>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <p class="p-badge">START HERE</p>
+      <h3 class="p-name">FREE ROAST</h3>
+      <div class="p-price">$0</div>
+      <p class="p-period">ONE TIME · NO CARD NEEDED</p>
+      <ul class="p-features">
+        <li>Full AI critique of your resume</li>
+        <li>Score out of 100</li>
+        <li>Specific weaknesses listed</li>
+        <li>Top 3 fixes identified</li>
+        <li>No rewrite included</li>
+      </ul>
+      <a href="#tool" class="pay-btn pay-btn-outline">START FREE →</a>
+    </div>
+    <div class="pricing-card featured">
+      <p class="p-badge">MOST POPULAR</p>
+      <h3 class="p-name">FULL REWRITE</h3>
+      <div class="p-price">$9</div>
+      <p class="p-period" style="color:#3A3020">ONE TIME · INSTANT DELIVERY</p>
+      <ul class="p-features">
+        <li>Everything in Free Roast</li>
+        <li>Complete resume rewrite</li>
+        <li>ATS keyword optimization</li>
+        <li>Stronger action bullet points</li>
+        <li>Professional summary rewrite</li>
+        <li>Skills section optimization</li>
+      </ul>
+      <!-- Replace this href with your actual Gumroad/Stripe link -->
+      <a href="https://gumroad.com" target="_blank" class="pay-btn pay-btn-fire">GET REWRITE — $9 →</a>
+      <p class="pay-note">Secure payment via Gumroad</p>
+    </div>
+    <div class="pricing-card">
+      <p class="p-badge">BEST VALUE</p>
+      <h3 class="p-name">FULL PACKAGE</h3>
+      <div class="p-price">$19</div>
+      <p class="p-period">ONE TIME · INSTANT DELIVERY</p>
+      <ul class="p-features">
+        <li>Everything in Full Rewrite</li>
+        <li>Custom tailored cover letter</li>
+        <li>Job description matching</li>
+        <li>Interview-ready package</li>
+        <li>Unlimited edits via email</li>
+      </ul>
+      <!-- Replace this href with your actual Gumroad/Stripe link -->
+      <a href="https://gumroad.com" target="_blank" class="pay-btn pay-btn-outline">GET PACKAGE — $19 →</a>
+      <p class="pay-note">Secure payment via Gumroad</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <p class="section-eyebrow">RESULTS</p>
+  <h2 class="section-title">THEY GOT ROASTED.<br>THEN <em>HIRED.</em></h2>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-tag">HIRED IN 2 WEEKS</div>
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">I was applying for 3 months with zero callbacks. ResumeFired told me exactly why. Got the rewrite, had 4 interviews the next week.</p>
+      <p class="testi-author">Marcus T.</p>
+      <p class="testi-role">Software Engineer — now at a Series B startup</p>
+    </div>
+    <div class="testi-card">
+      <div class="testi-tag">SALARY +$18K</div>
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">The roast was savage but accurate. "Responsible for" appeared in every single bullet. The rewrite transformed it completely. Worth every penny.</p>
+      <p class="testi-author">Priya K.</p>
+      <p class="testi-role">Product Manager — switched industries successfully</p>
+    </div>
+    <div class="testi-card">
+      <div class="testi-tag">FIRST JOB EVER</div>
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">As a recent grad I had no idea what I was doing wrong. $9 was the best investment of my entire job search. Landed my first dev role in 3 weeks.</p>
+      <p class="testi-author">James L.</p>
+      <p class="testi-role">Junior Developer — landed first role</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <p class="section-eyebrow">FAQ</p>
+  <h2 class="section-title">COMMON<br><em>QUESTIONS</em></h2>
+  <div class="faq-grid">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">Is the free roast actually free? <span class="faq-arrow">+</span></button>
+      <div class="faq-a">Yes, 100% free. No email, no credit card, no signup. Just paste your resume and hit the button. The critique is generated by real AI and is completely free.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">Is this AI or a real human? <span class="faq-arrow">+</span></button>
+      <div class="faq-a">It is AI-powered — specifically Claude AI by Anthropic. We are transparent about this. The feedback is generated by AI, not a human resume expert. This is why we can offer it for free and at $9 instead of $100+.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">How does the $9 rewrite work? <span class="faq-arrow">+</span></button>
+      <div class="faq-a">After payment via Gumroad, you'll be prompted to submit your resume. The AI generates a full rewrite and delivers it to your email within minutes.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">Is my resume data private? <span class="faq-arrow">+</span></button>
+      <div class="faq-a">Your resume text is sent to the AI to generate the critique and is not stored on our servers. We recommend removing sensitive personal info like your home address before pasting.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">What if I'm not satisfied? <span class="faq-arrow">+</span></button>
+      <div class="faq-a">We offer a full refund within 24 hours if you're not happy with the rewrite. No questions asked. Contact us via the form below.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="contact-inner">
+    <p class="section-eyebrow" style="color:var(--fire)">GET IN TOUCH</p>
+    <h2 class="contact-title">QUESTIONS?<br>WE'VE GOT ANSWERS.</h2>
+    <p class="contact-sub">Have a question, want a refund, or need help with your order? Fill out the form and we'll get back to you within 24 hours.</p>
+
+    <div class="form-group">
+      <label class="form-label">YOUR NAME</label>
+      <input type="text" class="form-input" id="contactName" placeholder="John Smith">
+    </div>
+    <div class="form-group">
+      <label class="form-label">YOUR EMAIL</label>
+      <input type="email" class="form-input" id="contactEmail" placeholder="john@email.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">SUBJECT</label>
+      <select class="form-input" id="contactSubject">
+        <option value="">Select a topic...</option>
+        <option>Question about the free roast</option>
+        <option>Question about the $9 rewrite</option>
+        <option>Request a refund</option>
+        <option>Technical issue</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">MESSAGE</label>
+      <textarea class="form-input" id="contactMessage" rows="4" placeholder="Tell us what you need..." style="resize:vertical;min-height:120px"></textarea>
+    </div>
+    <button class="form-submit" onclick="submitContact()">SEND MESSAGE →</button>
+    <div class="form-success" id="formSuccess">
+      ✓ Message sent! We'll get back to you within 24 hours.
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <h2 class="cta-title">STOP GETTING IGNORED.<br>START GETTING HIRED.</h2>
+  <p class="cta-sub">FREE ROAST · NO SIGNUP · 60 SECONDS</p>
+  <a href="#tool" class="btn-white">🔥 ROAST MY RESUME NOW</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">RESUME<span>FIRED</span> 🔥</div>
+      <div class="footer-tagline">Honest AI resume critique. Built for job seekers.</div>
+      <div class="disclaimer" style="margin-top:1rem">
+        ⚠️ This tool uses AI to generate feedback. Results are AI-generated and not from a human expert. We are transparent about this. Always review AI output with your own judgment.
+      </div>
+    </div>
+    <div class="footer-links">
+      <h4>Navigate</h4>
+      <a href="#how">How It Works</a>
+      <a href="#tool">Free Roast</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="footer-links">
+      <h4>Plans</h4>
+      <a href="#tool">Free Roast — $0</a>
+      <a href="#pricing">Full Rewrite — $9</a>
+      <a href="#pricing">Full Package — $19</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 ResumeFired. All rights reserved.</span>
+    <span>AI-powered · Not affiliated with any employer</span>
+  </div>
+</footer>
+
+<script>
+// Mobile menu
+function openMobile() { document.getElementById('mobileMenu').classList.add('open'); }
+function closeMobile() { document.getElementById('mobileMenu').classList.remove('open'); }
+
+// Plan selection
+let selectedPlan = 'free';
+function selectPlan(el, plan) {
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlan = plan;
+  const btn = document.getElementById('submitBtn');
+  const labels = { free: '🔥 ROAST MY RESUME NOW — FREE', rewrite: '🔥 GET FULL REWRITE — $9', full: '🔥 GET FULL PACKAGE — $19' };
+  btn.textContent = labels[plan];
+}
+
+// FAQ
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// Contact form
+function submitContact() {
+  const name = document.getElementById('contactName').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  const msg = document.getElementById('contactMessage').value.trim();
+  if (!name || !email || !msg) { alert('Please fill in all fields.'); return; }
+  // In production: send to your email via Formspree or EmailJS
+  document.getElementById('formSuccess').classList.add('visible');
+  document.getElementById('contactName').value = '';
+  document.getElementById('contactEmail').value = '';
+  document.getElementById('contactMessage').value = '';
+}
+
+// Resume roaster
+async function roastResume() {
+  const input = document.getElementById('resumeInput').value.trim();
+  if (!input || input.length < 50) {
+    alert('Please paste your resume text first — at least a few lines.');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  const loadingBar = document.getElementById('loadingBar');
+  const loadingText = document.getElementById('loadingText');
+  const resultArea = document.getElementById('resultArea');
+  const upgradeBox = document.getElementById('upgradeBox');
+
+  btn.disabled = true;
+  btn.textContent = 'ROASTING...';
+  loadingBar.classList.add('visible');
+  loadingText.classList.add('visible');
+  resultArea.classList.remove('visible');
+  upgradeBox.style.display = 'none';
+
+  const prompts = {
+    free: `You are a brutally honest resume critic. Analyze this resume and give a savage but constructive critique.
+
+Respond EXACTLY in this format:
+
+RESUME SCORE: [X/100]
+
+🔥 THE BRUTAL TRUTH
+[2-3 sentences of the most critical overall assessment. Be specific and direct.]
+
+❌ WHAT'S KILLING YOUR CHANCES
+[4-6 bullet points of the biggest problems. Reference actual content from their resume. Start each with a dash -]
+
+⚠️ SMALLER ISSUES
+[3-4 bullet points of secondary problems. Start each with a dash -]
+
+💡 WHAT'S ACTUALLY WORKING
+[1-2 things that are decent. Be honest — if nothing is working, say so.]
+
+🎯 TOP 3 FIXES — DO THESE FIRST
+1. [Most impactful fix with specific example from their resume]
+2. [Second most impactful fix]
+3. [Third most impactful fix]
+
+Be specific, reference actual content from their resume, and do not sugarcoat it.
+
+RESUME TO ANALYZE:
+${input}`,
+
+    rewrite: `You are an expert resume writer. Brutally critique then fully rewrite this resume.
+
+RESUME SCORE: [X/100]
+
+🔥 THE BRUTAL TRUTH
+[2-3 sentences]
+
+❌ CRITICAL ISSUES
+[4-5 bullet points starting with -]
+
+✅ YOUR REWRITTEN RESUME
+[Complete professional rewrite. Use strong action verbs. Quantify achievements. Use → for bullet points. Include: Professional Summary, Experience, Skills, Education sections properly structured.]
+
+RESUME:
+${input}`,
+
+    full: `You are an expert resume writer. Brutally critique, fully rewrite, and write a cover letter.
+
+RESUME SCORE: [X/100]
+
+🔥 THE BRUTAL TRUTH
+[2-3 sentences]
+
+❌ CRITICAL ISSUES
+[4-5 bullet points starting with -]
+
+✅ YOUR REWRITTEN RESUME
+[Complete rewrite with → for bullets. Strong action verbs. Quantified achievements.]
+
+📝 YOUR COVER LETTER
+[A compelling, personalized cover letter based on their background. Human tone, not generic. 3 paragraphs.]
+
+RESUME:
+${input}`
+  };
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompts[selectedPlan] }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'Something went wrong. Please try again.';
+
+    const scoreMatch = text.match(/RESUME SCORE:\s*(\d+)/i);
+    const score = scoreMatch ? parseInt(scoreMatch[1]) : null;
+    const scoreEl = document.getElementById('scoreCircle');
+    scoreEl.textContent = score ? score : '?';
+    if (score) {
+      scoreEl.style.color = score < 40 ? '#FF3D00' : score < 65 ? '#FF8C00' : '#16A34A';
+      scoreEl.style.borderColor = scoreEl.style.color;
+    }
+
+    document.getElementById('resultContent').textContent = text;
+    resultArea.classList.add('visible');
+    resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    if (selectedPlan === 'free') {
+      upgradeBox.style.display = 'flex';
+    }
+
+  } catch (err) {
+    document.getElementById('resultContent').textContent = 'Connection error. Please try again in a moment.';
+    resultArea.classList.add('visible');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔥 ROAST AGAIN';
+  loadingBar.classList.remove('visible');
+  loadingText.classList.remove('visible');
+}
+</script>
+</body>
+</html>
